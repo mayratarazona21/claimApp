@@ -2,9 +2,6 @@
 
 $(function () {
   var dt_roles = $('.datatables-roles');
-  console.log('quiero que esto se suba');
-  console.log('quiero que esto se suba');
-  console.log('quiero que esto se suba');
   var buttonsTable = [
     {
       extend: 'collection',

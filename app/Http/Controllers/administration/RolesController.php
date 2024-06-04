@@ -37,7 +37,6 @@ class RolesController extends Controller
    */
   public function create()
   {
-    $nureavr = 'sdkf';
     $flag = 'create';
     $bAdministratorAccess = false;
     $rol = new CustomRole();
