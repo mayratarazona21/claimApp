@@ -2,16 +2,20 @@
 
 $(function () {
   var dt_roles = $('.datatables-roles');
+
   var buttonsTable = [
     {
       extend: 'collection',
       className: 'btn btn-label-secondary dropdown-toggle ms-3 me-2 waves-effect waves-light',
-      text: '<i class="mdi mdi-export-variant me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+      text:
+        '<i class="mdi mdi-export-variant me-sm-1"></i> <span class="d-none d-sm-inline-block">' +
+        oLang.export +
+        '</span>',
       buttons: [
         {
           extend: 'print',
-          title: 'Roles',
-          text: '<i class="mdi mdi-printer-outline me-1" ></i>Print',
+          title: oLang.roles,
+          text: '<i class="mdi mdi-printer-outline me-1" ></i>' + oLang.print,
           className: 'dropdown-item',
           exportOptions: {
             columns: [0, 1, 2]
@@ -32,7 +36,7 @@ $(function () {
         },
         {
           extend: 'csv',
-          title: 'Roles',
+          title: oLang.roles,
           text: '<i class="mdi mdi-file-document-outline me-1" ></i>Csv',
           className: 'dropdown-item',
           exportOptions: {
@@ -41,7 +45,7 @@ $(function () {
         },
         {
           extend: 'excel',
-          title: 'Roles',
+          title: oLang.roles,
           text: 'Excel',
           className: 'dropdown-item',
           exportOptions: {
@@ -50,7 +54,7 @@ $(function () {
         },
         {
           extend: 'pdf',
-          title: 'Roles',
+          title: oLang.roles,
           text: '<i class="mdi mdi-file-pdf-box me-1"></i>Pdf',
           className: 'dropdown-item',
           exportOptions: {
@@ -59,8 +63,8 @@ $(function () {
         },
         {
           extend: 'copy',
-          title: 'Roles',
-          text: '<i class="mdi mdi-content-copy me-1" ></i>Copy',
+          title: oLang.roles,
+          text: '<i class="mdi mdi-content-copy me-1" ></i>' + oLang.copy,
           className: 'dropdown-item',
           exportOptions: {
             columns: [0, 1, 2]
@@ -72,7 +76,10 @@ $(function () {
 
   if (permissionCreate) {
     buttonsTable.push({
-      text: '<a class="add-role"><i class="mdi mdi-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Role</span></a>',
+      text:
+        '<a class="add-role"><i class="mdi mdi-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">' +
+        oLang.addNewRole +
+        '</span></a>',
       className: 'add-new btn btn-primary waves-effect waves-light'
     });
   }
@@ -86,25 +93,31 @@ $(function () {
         { data: 'status' },
         { data: 'creation_date' },
         {
-          title: 'Actions',
+          title: oLang.actions,
           render: function (data, type, row, meta) {
             var buttosActions =
               '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon view-role" attr-id-role="' +
               row.encrypted_id +
-              '" data-toggle="tooltip" title="View"><i class="ri-eye-line"></i></a>';
+              '" data-toggle="tooltip" title="' +
+              oLang.view +
+              '"><i class="ri-eye-line"></i></a>';
 
             buttosActions +=
               permissionEdit && row.id_status != 2
                 ? '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon edit-role" attr-id-role="' +
                   row.encrypted_id +
-                  '" data-toggle="tooltip" title="Edit"><i class="mdi mdi-pencil-outline"></i></a>'
+                  '" data-toggle="tooltip" title="' +
+                  oLang.edit +
+                  '"><i class="mdi mdi-pencil-outline"></i></a>'
                 : '';
 
             buttosActions +=
               permissionDelete && row.id_status != 2
                 ? '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon delete-role" attr-id-role="' +
                   row.encrypted_id +
-                  '" data-toggle="tooltip" title="Delete"><i class="ri-delete-bin-line"></i></a>'
+                  '" data-toggle="tooltip" title="' +
+                  oLang.delete +
+                  '"><i class="ri-delete-bin-line"></i></a>'
                 : '';
             return buttosActions;
           }
@@ -117,8 +130,8 @@ $(function () {
           render: function (data, type, full, meta) {
             var $status_number = full['status'];
             var $status = {
-              Active: { title: 'Active', class: 'bg-label-success' },
-              Inactive: { title: 'Inactive', class: ' bg-label-danger' }
+              Active: { title: oLang.active, class: 'bg-label-success' },
+              Inactive: { title: oLang.inactive, class: ' bg-label-danger' }
             };
             if (typeof $status[$status_number] === 'undefined') {
               return data;
@@ -168,13 +181,13 @@ $(function () {
       var idRole = $(this).attr('attr-id-role');
 
       Swal.fire({
-        title: 'Are you sure?',
-        text: 'The role will be deleted',
+        title: oLang.areYouSure,
+        text: oLang.roleWillBeDeleted,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes',
+        confirmButtonText: oLang.yes,
         customClass: {
           confirmButton: 'btn btn-primary me-1 waves-effect waves-light',
           cancelButton: 'btn btn-outline-secondary waves-effect'

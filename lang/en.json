@@ -30,5 +30,12 @@
   "actions": "Actions",
   "roleInactiveOk": "The role was successfully inactivated",
   "roleDeleteOk": "The role was successfully deleted",
-  "unexpectedError": "Unexpected error has ocurred"
+  "unexpectedError": "Unexpected error has ocurred",
+  "rolePermissions": "Role Permissions",
+  "administratorAccess": "Administrator Access",
+  "log": "Log",
+  "logDetails": "Log Details",
+  "log-access": "Access log",
+  "log-actions": "Actions log",
+  "timestamp": "Timestamp"
 }

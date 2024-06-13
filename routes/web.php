@@ -10,6 +10,7 @@ use App\Http\Controllers\authentications\LoginBasic;
 use App\Http\Controllers\authentications\RegisterBasic;
 use App\Http\Controllers\administration\UserManagement;
 use App\Http\Controllers\administration\RolesController;
+use App\Http\Controllers\LogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,16 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
   Route::get('/administration/roles', [RolesController::class, 'index'])->name('roles');
   Route::resource('rol', RolesController::class);
   Route::get('/roles/{encrypted_id}/edit', [RolesController::class, 'edit'])->name('roles.edit');
+
+  Route::get('/administration/log-access', [LogController::class, 'showLogAccess'])->name(
+    'administration.log.log-access'
+  );
+  Route::get('/administration/log-actions', [LogController::class, 'showLogActions'])->name(
+    'administration.log.log-actions'
+  );
+  Route::get('/administration/log-details/{id}', [LogController::class, 'show'])->name(
+    'administration.log.log-details'
+  );
 
   // Route::resource('/administration/roles', RolesController::class)->name('roles');
   //Route::post('/menu-list', [RolesController::class, 'menuList']);

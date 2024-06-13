@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CustomRole;
 use App\Services\HashidsService;
+use App\Models\Log;
 
 class RolesController extends Controller
 {
@@ -80,7 +81,15 @@ class RolesController extends Controller
         'guard_name' => 'web',
         'id_status' => 1,
       ])->syncPermissions($request->permissions);
-      //Log::logCrear(Auth()->user()->id, 'roles', $role->id, ['nombre' => $role->name]);
+
+      Log::create([
+        'user_id' => auth()->id(),
+        'action' => 'create',
+        'details' => json_encode([
+          'target_id' => $role->id,
+          'name' => $role->name,
+        ]),
+      ]);
 
       return response()->json([
         'name' => 'Success',
@@ -152,6 +161,15 @@ class RolesController extends Controller
       $role = CustomRole::findOrFail($id);
       $role->update(['name' => ucfirst($request->name)]);
       $role->syncPermissions($request->permissions);
+
+      Log::create([
+        'user_id' => auth()->id(),
+        'action' => 'update',
+        'details' => json_encode([
+          'target_id' => $id,
+          'changes' => $request->all(),
+        ]),
+      ]);
 
       return response()->json([
         'name' => 'Success',

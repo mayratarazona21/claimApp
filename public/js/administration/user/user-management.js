@@ -15,7 +15,7 @@ $(function () {
   if (select2.length) {
     var $this = select2;
     $this.wrap('<div class="position-relative"></div>').select2({
-      placeholder: 'Select Role',
+      placeholder: oLang.selectRol,
       dropdownParent: $this.parent()
     });
   }
@@ -108,8 +108,8 @@ $(function () {
           render: function (data, type, full, meta) {
             var $status_number = full['status'];
             var $status = {
-              Active: { title: 'Active', class: 'bg-label-success' },
-              Inactive: { title: 'Inactive', class: ' bg-label-danger' }
+              Active: { title: oLang.active, class: 'bg-label-success' },
+              Inactive: { title: oLang.inactive, class: ' bg-label-danger' }
             };
             if (typeof $status[$status_number] === 'undefined') {
               return data;
@@ -126,7 +126,7 @@ $(function () {
         {
           // Actions
           targets: -1,
-          title: 'Actions',
+          title: oLang.actions,
           searchable: false,
           orderable: false,
           render: function (data, type, full, meta) {
@@ -158,20 +158,22 @@ $(function () {
         '>',
       language: {
         sLengthMenu: '_MENU_',
-        search: '',
-        searchPlaceholder: 'Search..'
+        search: ''
       },
       // Buttons with Dropdown
       buttons: [
         {
           extend: 'collection',
           className: 'btn btn-label-secondary dropdown-toggle ms-3 me-2 waves-effect waves-light',
-          text: '<i class="mdi mdi-export-variant me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+          text:
+            '<i class="mdi mdi-export-variant me-sm-1"></i> <span class="d-none d-sm-inline-block">' +
+            oLang.export +
+            '</span>',
           buttons: [
             {
               extend: 'print',
-              title: 'Users',
-              text: '<i class="mdi mdi-printer-outline me-1" ></i>Print',
+              title: oLang.users,
+              text: '<i class="mdi mdi-printer-outline me-1" ></i>' + oLang.print,
               className: 'dropdown-item',
               exportOptions: {
                 columns: [1, 2, 3, 4]
@@ -192,7 +194,7 @@ $(function () {
             },
             {
               extend: 'csv',
-              title: 'Users',
+              title: oLang.users,
               text: '<i class="mdi mdi-file-document-outline me-1" ></i>Csv',
               className: 'dropdown-item',
               exportOptions: {
@@ -215,7 +217,7 @@ $(function () {
             },
             {
               extend: 'excel',
-              title: 'Users',
+              title: oLang.users,
               text: 'Excel',
               className: 'dropdown-item',
               exportOptions: {
@@ -238,7 +240,7 @@ $(function () {
             },
             {
               extend: 'pdf',
-              title: 'Users',
+              title: oLang.users,
               text: '<i class="mdi mdi-file-pdf-box me-1"></i>Pdf',
               className: 'dropdown-item',
               exportOptions: {
@@ -261,8 +263,8 @@ $(function () {
             },
             {
               extend: 'copy',
-              title: 'Users',
-              text: '<i class="mdi mdi-content-copy me-1" ></i>Copy',
+              title: oLang.users,
+              text: '<i class="mdi mdi-content-copy me-1" ></i>' + oLang.copy,
               className: 'dropdown-item',
               exportOptions: {
                 columns: [1, 2, 3, 4],
@@ -285,7 +287,10 @@ $(function () {
           ]
         },
         {
-          text: '<i class="mdi mdi-plus me-sm-1"></i><span class="d-none d-sm-inline-block">Add New User</span>',
+          text:
+            '<i class="mdi mdi-plus me-sm-1"></i><span class="d-none d-sm-inline-block">' +
+            oLang.addNewUser +
+            '</span>',
           className: 'add-new btn btn-primary waves-effect waves-light',
           attr: {
             'data-bs-toggle': 'offcanvas',
@@ -342,11 +347,10 @@ $(function () {
 
     // sweetalert for confirmation of delete
     Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
+      title: oLang.areYouSure,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
+      confirmButtonText: oLang.yes,
       customClass: {
         confirmButton: 'btn btn-primary me-3',
         cancelButton: 'btn btn-label-secondary'
@@ -369,17 +373,8 @@ $(function () {
         // success sweetalert
         Swal.fire({
           icon: 'success',
-          title: 'Deleted!',
-          text: 'The user has been deleted!',
-          customClass: {
-            confirmButton: 'btn btn-success'
-          }
-        });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          title: 'Cancelled',
-          text: 'The User is not deleted!',
-          icon: 'error',
+          title: oLang.deleted,
+          text: oLang.userHasBeenDeleted,
           customClass: {
             confirmButton: 'btn btn-success'
           }

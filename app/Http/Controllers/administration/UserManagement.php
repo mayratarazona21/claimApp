@@ -19,18 +19,22 @@ class UserManagement extends Controller
   {
     $users = User::all();
     $userCount = $users->count();
-    $verified = User::whereNotNull('email_verified_at')->get()->count();
-    $notVerified = User::whereNull('email_verified_at')->get()->count();
+    $verified = User::whereNotNull('email_verified_at')
+      ->get()
+      ->count();
+    $notVerified = User::whereNull('email_verified_at')
+      ->get()
+      ->count();
     $usersUnique = $users->unique(['email']);
     $userDuplicates = $users->diff($usersUnique)->count();
-    $roles = Role::where('id_status',1)->get();
+    $roles = Role::where('id_status', 1)->get();
 
     return view('administration.user.user-management', [
       'totalUser' => $userCount,
       'verified' => $verified,
       'notVerified' => $notVerified,
       'userDuplicates' => $userDuplicates,
-      'roles' => $roles
+      'roles' => $roles,
     ]);
   }
 
@@ -48,7 +52,7 @@ class UserManagement extends Controller
       4 => 'email_verified_at',
       6 => 'contact',
       6 => 'status',
-      7 => 'role'
+      7 => 'role',
     ];
 
     $search = [];
@@ -67,7 +71,14 @@ class UserManagement extends Controller
         ->offset($start)
         ->limit($limit)
         ->orderBy($order, $dir)
-        ->select('users.id','users.name','users.email','users.email_verified_at','users.contact','s.name as status')
+        ->select(
+          'users.id',
+          'users.name',
+          'users.email',
+          'users.email_verified_at',
+          'users.contact',
+          's.name as status'
+        )
         ->get();
     } else {
       $search = $request->input('search.value');
@@ -81,7 +92,14 @@ class UserManagement extends Controller
         ->offset($start)
         ->limit($limit)
         ->orderBy($order, $dir)
-        ->select('users.id','users.name','users.email','users.email_verified_at','users.contact','s.name as status')
+        ->select(
+          'users.id',
+          'users.name',
+          'users.email',
+          'users.email_verified_at',
+          'users.contact',
+          's.name as status'
+        )
         ->get();
 
       $totalFiltered = User::where('users.id', 'LIKE', "%{$search}%")
@@ -112,7 +130,7 @@ class UserManagement extends Controller
         $data[] = $nestedData;
       }
     }
-   
+
     if ($data) {
       return response()->json([
         'draw' => intval($request->input('draw')),
@@ -160,10 +178,19 @@ class UserManagement extends Controller
       $oldRole = $user->roles()->first();
       $newRole = Role::find($request->idRole);
       $user->roles()->sync([$newRole->id]);
-     
+
       if ($oldRole) {
         $user->roles()->detach($oldRole);
       }
+
+      Log::create([
+        'user_id' => auth()->id(),
+        'action' => 'update',
+        'details' => json_encode([
+          'target_id' => $id,
+          'changes' => $request->all(),
+        ]),
+      ]);
 
       // user updated
       return response()->json('Updated');
@@ -174,17 +201,31 @@ class UserManagement extends Controller
       if (empty($userEmail)) {
         $user = User::updateOrCreate(
           ['id' => $userID],
-          ['name' => $request->name, 'email' => $request->email, 'contact' => $request->contact, 'password' => bcrypt(Str::random(10))]
+          [
+            'name' => $request->name,
+            'email' => $request->email,
+            'contact' => $request->contact,
+            'password' => bcrypt(Str::random(10)),
+          ]
         );
-                    
-        $role = Role::find($request->idRole);    
+
+        $role = Role::find($request->idRole);
         $user->roles()->attach($role);
-   
+
+        Log::create([
+          'user_id' => auth()->id(),
+          'action' => 'update',
+          'details' => json_encode([
+            'target_id' => $id,
+            'changes' => $request->all(),
+          ]),
+        ]);
+
         // user created
         return response()->json('Created');
       } else {
         // user already exist
-        return response()->json(['message' => "already exits"], 422);
+        return response()->json(['message' => 'already exits'], 422);
       }
     }
   }
@@ -235,9 +276,13 @@ class UserManagement extends Controller
   public function destroy($id)
   {
     //$users = User::where('id', $id)->delete();
-    $users = User::updateOrCreate(
-      ['id' => $id],
-      ['id_status' => 2]
-    );
+    Log::create([
+      'user_id' => auth()->id(),
+      'action' => 'delete',
+      'details' => json_encode([
+        'target_id' => $id,
+      ]),
+    ]);
+    $users = User::updateOrCreate(['id' => $id], ['id_status' => 2]);
   }
 }

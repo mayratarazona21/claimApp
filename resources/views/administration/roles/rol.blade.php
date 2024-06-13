@@ -39,14 +39,14 @@ $configData = Helper::appClasses();
         <div class="col-12 mb-4">
           <div class="form-floating form-floating-outline">
             <input type="text" id="modalRoleName" name="modalRoleName" class="form-control" placeholder="Enter a role name" tabindex="-1" value="{{ $rol->name }}" @disabled($viewOnly)/>
-            <label for="modalRoleName">Role Name</label>
+            <label for="modalRoleName">{{ trans('roleName') }}</label>
           </div>
         </div>
         <div class="col-12">
-          <h5>Role Permissions</h5>
+          <h5>{{ trans('rolePermissions') }}</h5>
           <div class="form-check form-check-primary mt-4">
             <input class="form-check-input" type="checkbox" value="" id="selectAll" {{ $bAdministratorAccess ? 'checked' : '' }} @disabled($viewOnly)/>
-            <label class="form-check-label" for="selectAll">Administrator Access<i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Allows a full access to the system" ></i></label>
+            <label class="form-check-label" for="selectAll">{{ trans('administratorAccess') }}<i class="mdi mdi-information-outline" data-bs-toggle="tooltip" data-bs-placement="top" title="Allows a full access to the system" ></i></label>
           </div>
 
           <!-- Permission table -->
@@ -174,5 +174,5 @@ $configData = Helper::appClasses();
 <script>
   var flag = @json($flag);
   var idRole = @json($rol->encrypted_id);
- // var viewOnly = flag == 'view';
+
 </script>

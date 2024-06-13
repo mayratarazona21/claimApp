@@ -9,6 +9,9 @@
 <script src="{{ asset(mix('assets/vendor/js/menu.js')) }}"></script>
 <script src="{{ '/js/app.js' }}"></script>
 <script src="{{asset('assets/vendor/libs/sweetalert2/sweetalert2.js')}}"></script>
+<script src="{{ '/js/lang_' . app()->getLocale() . '.js' }}"></script>
+
+
 @yield('vendor-script')
 <!-- END: Page Vendor JS-->
 <!-- BEGIN: Theme JS-->
@@ -23,4 +26,4 @@
 <!-- END: Page JS-->
 
 @stack('modals')
-@livewireScripts
+{{-- @livewireScripts --}}

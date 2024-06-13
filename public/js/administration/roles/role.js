@@ -109,7 +109,6 @@ function selectCheckSubMenu(idParent) {
 }
 
 function checkMainMenu(mainparent) {
-  console.log(mainparent);
   checkboxesMainMenu = document.querySelectorAll('[mainparent^="' + mainparent + '"]');
   const anyCheckedMainMenu = Array.from(checkboxesMainMenu).some(cb => cb.checked);
   document.querySelector('#' + mainparent).checked = anyCheckedMainMenu;
