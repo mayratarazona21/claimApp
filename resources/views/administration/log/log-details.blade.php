@@ -13,19 +13,19 @@ $configData = Helper::appClasses();
           <td>{{ $log->id }}</td>
       </tr>
       <tr>
-          <th>User ID</th>
-          <td>{{ $log->user_id }}</td>
+          <th>{{ trans('user') }}</th>
+          <td>{{ $log->first_name }}</td>
       </tr>
       <tr>
-          <th>Action</th>
+          <th>{{ trans('action') }}</th>
           <td>{{ $log->action }}</td>
       </tr>
       <tr>
-          <th>Details</th>
+          <th>{{ trans('details') }}</th>
           <td><pre>{{ json_encode(json_decode($log->details), JSON_PRETTY_PRINT) }}</pre></td>
       </tr>
       <tr>
-          <th>Timestamp</th>
+          <th>{{ trans('timestamp') }}</th>
           <td>{{ $log->created_at }}</td>
       </tr>
   </table>

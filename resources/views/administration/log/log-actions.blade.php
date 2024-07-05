@@ -41,7 +41,11 @@ $(function () {
   var dt_user = dt_roles.DataTable({
       data: logs,
       columns: [
-        { data: 'user' },
+        {
+          render: function (data, type, row, meta) {
+            return row.first_name +' '+row.last_name;
+          }
+        },
         { data: 'action' },
         { data: 'details',
           render: function (row) {

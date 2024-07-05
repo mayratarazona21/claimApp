@@ -43,8 +43,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
   Route::get('/', [HomePage::class, 'index'])->name('pages-home');
   Route::get('/auth/register-basic', [RegisterBasic::class, 'index'])->name('auth-register-basic');
 
-  Route::get('/administration/user-management', [UserManagement::class, 'UserManagement'])->name('user-management');
-  Route::resource('/user-list', UserManagement::class);
+  Route::get('/administration/users', [UserManagement::class, 'UserManagement'])->name('users');
+  Route::resource('/user', UserManagement::class);
 
   Route::get('/administration/roles', [RolesController::class, 'index'])->name('roles');
   Route::resource('rol', RolesController::class);

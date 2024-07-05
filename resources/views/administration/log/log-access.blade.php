@@ -40,7 +40,11 @@ $(function () {
   var dt_user = dt_roles.DataTable({
       data: logs,
       columns: [
-        { data: 'user' },
+        {
+          render: function (data, type, row, meta) {
+            return row.first_name +' '+ row.last_name;
+          }
+        }
         { data: 'details',
           render: function (row) {
             return row.substring(1, 70)+'...';

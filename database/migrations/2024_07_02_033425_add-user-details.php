@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
       Schema::table('users', function (Blueprint $table) {
-        $table->string('contact')->after('first_name')->nullable(true);
-        $table->unsignedBigInteger('id_status')->default(1)->after('email')->default(1);
-          $table->foreign('id_status')->references('id')->on('dictionary');
+        $table->string('last_name')->after('first_name')->nullable();
+        $table->date('date_birth')->after('contact')->nullable();
       });
     }
 

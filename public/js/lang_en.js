@@ -16,6 +16,16 @@ var oLang = {
   selectRol: 'Select Role',
   users: 'Users',
   addNewUser: 'Add New User',
-  deleted: 'Deleted!',
-  userHasBeenDeleted: 'The user has been deleted!'
+  userHasBeenInactivated: 'The user has been inactivated!',
+  emailRequired: 'The Email is required',
+  emailNotValid: 'The value is not a valid email address',
+  confirmEmailRequired: 'The Confirm Email is required',
+  emailConfirmNotSame: 'The email and its confirm are not the same',
+  passwordRequired: 'The password is required',
+  confirmPaswordRequired: 'The Confirm Password is required',
+  passwordConfirmNotSame: 'The password and its confirm are not the same',
+  firstNameRequired: 'The first name is required',
+  lastNameRequired: 'The last name is required',
+  successfully: 'Successfully!',
+  userWillBeDeactivated: 'The user will be deactivated.'
 };

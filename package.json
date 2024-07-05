@@ -126,7 +126,7 @@
     "bootstrap-maxlength": "1.10.1",
     "bootstrap-select": "snapappointments/bootstrap-select#main",
     "boxicons": "2.1.4",
-    "bs-stepper": "1.7.0",
+    "bs-stepper": "^1.7.0",
     "chart.js": "4.3.0",
     "cleave.js": "1.6.0",
     "clipboard": "2.0.11",

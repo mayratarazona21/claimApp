@@ -3,14 +3,22 @@
 namespace App\Http\Controllers\administration;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Log;
 use App\Models\User;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
+use App\Services\HashidsService;
 
 class UserManagement extends Controller
 {
+
+  protected $hashidsService;
+
+  public function __construct(HashidsService $hashidsService)
+  {
+    $this->hashidsService = $hashidsService;
+  }
   /**
    * Redirect to user-management view.
    *
@@ -29,7 +37,7 @@ class UserManagement extends Controller
     $userDuplicates = $users->diff($usersUnique)->count();
     $roles = Role::where('id_status', 1)->get();
 
-    return view('administration.user.user-management', [
+    return view('administration.user.index', [
       'totalUser' => $userCount,
       'verified' => $verified,
       'notVerified' => $notVerified,
@@ -46,13 +54,15 @@ class UserManagement extends Controller
   public function index(Request $request)
   {
     $columns = [
-      1 => 'id',
-      2 => 'name',
+      1 => 'encrypted_id',
+      2 => 'first_name',
       3 => 'email',
       4 => 'email_verified_at',
       6 => 'contact',
-      6 => 'status',
-      7 => 'role',
+      7 => 'id_status',
+      8 => 'status',
+      9 => 'roles',
+      10 => 'date_birth'
     ];
 
     $search = [];
@@ -61,77 +71,25 @@ class UserManagement extends Controller
 
     $totalFiltered = $totalData;
 
-    $limit = $request->input('length');
-    $start = $request->input('start');
-    $order = $columns[$request->input('order.0.column')];
-    $dir = $request->input('order.0.dir');
+    $users = User::join('dictionary AS s', 's.id', '=', 'users.id_status')
+    ->select('users.id','users.first_name','users.last_name','users.email','users.email_verified_at','users.contact','users.id_status','s.name as status','users.date_birth')
+    ->get();
 
-    if (empty($request->input('search.value'))) {
-      $users = User::join('dictionary AS s', 's.id', '=', 'users.id_status')
-        ->offset($start)
-        ->limit($limit)
-        ->orderBy($order, $dir)
-        ->select(
-          'users.id',
-          'users.name',
-          'users.email',
-          'users.email_verified_at',
-          'users.contact',
-          's.name as status'
-        )
-        ->get();
-    } else {
-      $search = $request->input('search.value');
-
-      $users = User::where('users.id', 'LIKE', "%{$search}%")
-        ->join('dictionary AS s', 's.id', '=', 'users.id_status')
-        ->orWhere('users.name', 'LIKE', "%{$search}%")
-        ->orWhere('users.email', 'LIKE', "%{$search}%")
-        ->orWhere('r.name', 'LIKE', "%{$search}%")
-        ->orWhere('s.name', 'LIKE', "%{$search}%")
-        ->offset($start)
-        ->limit($limit)
-        ->orderBy($order, $dir)
-        ->select(
-          'users.id',
-          'users.name',
-          'users.email',
-          'users.email_verified_at',
-          'users.contact',
-          's.name as status'
-        )
-        ->get();
-
-      $totalFiltered = User::where('users.id', 'LIKE', "%{$search}%")
-        ->join('dictionary AS s', 's.id', '=', 'users.id_status')
-        ->orWhere('users.name', 'LIKE', "%{$search}%")
-        ->orWhere('users.email', 'LIKE', "%{$search}%")
-        ->orWhere('r.name', 'LIKE', "%{$search}%")
-        ->orWhere('s.name', 'LIKE', "%{$search}%")
-        ->select('users.id')
-        ->count();
+    foreach ($users as $user) {
+      $nestedData['encrypted_id'] = $user->encrypted_id;
+      $nestedData['first_name'] = $user->first_name;
+      $nestedData['last_name'] = $user->last_name;
+      $nestedData['date_birth'] = $user->date_birth;
+      $nestedData['email'] = $user->email;
+      $nestedData['email_verified_at'] = $user->email_verified_at;
+      $nestedData['contact'] = $user->contact;
+      $nestedData['id_status'] = $user->id_status;
+      $nestedData['status'] = $user->status;
+      $nestedData['roles'] = $user->getRoleNames();
+      $data[] = $nestedData;
     }
 
-    $data = [];
-
-    if (!empty($users)) {
-      // providing a dummy id instead of database ids
-      $ids = $start;
-
-      foreach ($users as $user) {
-        $nestedData['id'] = $user->id;
-        $nestedData['fake_id'] = ++$ids;
-        $nestedData['name'] = $user->name;
-        $nestedData['email'] = $user->email;
-        $nestedData['email_verified_at'] = $user->email_verified_at;
-        $nestedData['contact'] = $user->contact;
-        $nestedData['status'] = $user->status;
-        $nestedData['role'] = $user->roles()->first() ? ucfirst($user->roles()->first()->name) : '';
-        $data[] = $nestedData;
-      }
-    }
-
-    if ($data) {
+    if (!empty($data)) {
       return response()->json([
         'draw' => intval($request->input('draw')),
         'recordsTotal' => intval($totalData),
@@ -155,7 +113,11 @@ class UserManagement extends Controller
    */
   public function create()
   {
-    //
+    $user = new User();
+    $roles = Role::where('id_status', 1)->get();
+    $title = trans('createUser');
+    $selectedRoles = [];
+    return view('administration.user.user', compact('user', 'roles', 'title', 'selectedRoles'));
   }
 
   /**
@@ -166,67 +128,45 @@ class UserManagement extends Controller
    */
   public function store(Request $request)
   {
-    $userID = $request->id;
 
-    if ($userID) {
-      // update the value
+    //$id = $this->hashidsService->decode($request->UserId);
+    $userID = $request->id;
+    // create new one if email is unique
+    $userEmail = User::where('email', $request->email)->first();
+
+    if (empty($userEmail)) {
       $user = User::updateOrCreate(
         ['id' => $userID],
-        ['name' => $request->name, 'email' => $request->email, 'contact' => $request->contact]
+        [
+          'first_name' => $request->first_name,
+          'last_name' => $request->last_name,
+          'date_birth' => $request->date_birth,
+          'email' => $request->email,
+          'contact' => $request->contact,
+          'password' => Hash::make($request->password),
+        ]
       );
 
-      $oldRole = $user->roles()->first();
-      $newRole = Role::find($request->idRole);
-      $user->roles()->sync([$newRole->id]);
+      $roles = Role::whereIn('id', $request->roles)->get()->pluck('name')->toArray();
 
-      if ($oldRole) {
-        $user->roles()->detach($oldRole);
-      }
+      $user->syncRoles($roles);
 
       Log::create([
         'user_id' => auth()->id(),
-        'action' => 'update',
+        'action' => 'create',
         'details' => json_encode([
-          'target_id' => $id,
-          'changes' => $request->all(),
+          'target_id' => $userID,
+          'changes' => ['first_name' => $request->first_name,
+          'last_name' => $request->last_name,
+          'email' => $request->email,
+          'contact' => $request->contact,
+          'date_birth' => $request->date_birth],
         ]),
       ]);
-
-      // user updated
-      return response()->json('Updated');
+      return response()->json(['message' => trans('userCreateSuccessfully')]);
     } else {
-      // create new one if email is unique
-      $userEmail = User::where('email', $request->email)->first();
-
-      if (empty($userEmail)) {
-        $user = User::updateOrCreate(
-          ['id' => $userID],
-          [
-            'name' => $request->name,
-            'email' => $request->email,
-            'contact' => $request->contact,
-            'password' => bcrypt(Str::random(10)),
-          ]
-        );
-
-        $role = Role::find($request->idRole);
-        $user->roles()->attach($role);
-
-        Log::create([
-          'user_id' => auth()->id(),
-          'action' => 'update',
-          'details' => json_encode([
-            'target_id' => $id,
-            'changes' => $request->all(),
-          ]),
-        ]);
-
-        // user created
-        return response()->json('Created');
-      } else {
-        // user already exist
-        return response()->json(['message' => 'already exits'], 422);
-      }
+      // user already exist
+      return response()->json(['message' => trans('emailAlreadyExists')], 422);
     }
   }
 
@@ -247,13 +187,16 @@ class UserManagement extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function edit($id)
+  public function edit($encrypted_id)
   {
-    $where = ['id' => $id];
+    $id = $this->hashidsService->decode($encrypted_id);
 
-    $users = User::where($where)->first();
+    $user = User::where('id' , $id)->first();
+    $roles = Role::where('id_status', 1)->get();
+    $selectedRoles = $user->roles()->pluck('id')->toArray();
+    $title = trans('editUser');
+    return view('administration.user.user', compact('user', 'roles', 'title','selectedRoles'));
 
-    return response()->json($users);
   }
 
   /**
@@ -263,8 +206,34 @@ class UserManagement extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function update(Request $request, $id)
+  public function update(Request $request, $encrypted_id)
   {
+    $userID = $this->hashidsService->decode($encrypted_id);
+    $dataUpdate = ['first_name' => $request->first_name, 'last_name' => $request->last_name, 'date_birth' => $request->date_birth , 'email' => $request->email, 'contact' => $request->contact];
+
+    $user = User::updateOrCreate(['id' => $userID], $dataUpdate );
+
+   if(!empty($request->password)){
+      $user = User::updateOrCreate(
+        ['id' => $userID],
+        ['password' => Hash::make($request->password)]
+      );
+      $dataUpdate['password'] = '******';
+    }
+
+    $user->roles()->sync($request->roles);
+
+    Log::create([
+      'user_id' => auth()->id(),
+      'action' => 'update',
+      'details' => json_encode([
+        'target_id' => $userID,
+        'changes' => $dataUpdate,
+      ]),
+    ]);
+
+    // user updated
+    return response()->json(['message' => trans('userUpdatedSuccessfully')]);
   }
 
   /**
@@ -273,8 +242,9 @@ class UserManagement extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function destroy($id)
+  public function destroy($encrypted_id)
   {
+    $id = $this->hashidsService->decode($encrypted_id);
     //$users = User::where('id', $id)->delete();
     Log::create([
       'user_id' => auth()->id(),
