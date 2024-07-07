@@ -21,7 +21,8 @@ $configData = Helper::appClasses();
         <tr class="text-nowrap">
           <th>{{ trans('user') }}</th>
           <th>{{ trans('action') }}</th>
-          <th>{{ trans('details') }}</th>
+          <th>{{ trans('description') }}</th>
+          <th>{{ trans('timestamp') }}</th>
           <th>{{ trans('actions') }}</th>
         </tr>
       </thead>
@@ -47,23 +48,24 @@ $(function () {
           }
         },
         { data: 'action' },
-        { data: 'details',
-          render: function (row) {
-            return row.substring(1, 70)+'...';
+        { data: 'description' },
+        {
+          render: function (data, type, row, meta) {
+            return moment(row.created_at).format('YYYY-MM-DD HH:mm:ss');
           }
         },
         { title: oLang.actions,
           render: function (data, type, row, meta) {
 
-            return '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon view-log" attr-id="' +
+            return row.action_id != 6 ? '<a href="javascript:;" class="btn btn-sm btn-text-secondary rounded-pill btn-icon view-log" attr-id="' +
               row.id +
               '" data-toggle="tooltip" title="' +
               oLang.view +
-              '"><i class="ri-eye-line"></i></a>';
+              '"><i class="ri-eye-line"></i></a>' : '';
           }
         }
       ],
-      order: [[1, 'desc']]
+      order: [[3, 'desc']]
     });
 
 })

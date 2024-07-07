@@ -1,5 +1,7 @@
 'use strict';
 
+//const { dump } = require('laravel-mix');
+
 $(function () {
   var dt_roles = $('.datatables-roles');
 
@@ -189,7 +191,7 @@ $(function () {
         cancelButtonColor: '#d33',
         confirmButtonText: oLang.yes,
         customClass: {
-          confirmButton: 'btn btn-primary me-1 waves-effect waves-light',
+          confirmButton: 'btn btn-warning me-1 waves-effect waves-light',
           cancelButton: 'btn btn-outline-secondary waves-effect'
         },
         buttonsStyling: false
@@ -198,17 +200,21 @@ $(function () {
           $.ajax({
             url: `${baseUrl}rol/` + idRole,
             type: 'DELETE',
-            success: function (reponse) {
+            success: function (response) {
+              console.log(response);
+
               Swal.fire({
-                icon: reponse.state,
-                title: reponse.name,
-                text: reponse.message,
+                icon: response.state,
+                title: response.name,
+                text: response.message,
                 customClass: {
-                  confirmButton: 'btn btn-success'
+                  confirmButton: 'btn btn-' + response.state
                 }
               });
 
-              location.href = `${baseUrl}administration/roles`;
+              if (response.state == 'success') {
+                location.href = `${baseUrl}administration/roles`;
+              }
             },
             error: function (err) {}
           });

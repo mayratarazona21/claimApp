@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
     // add role form validation
     FormValidation.formValidation(document.getElementById('roleForm'), {
       fields: {
-        modalRoleName: {
+        roleName: {
           validators: {
             notEmpty: {
               message: 'Please enter role name'
@@ -50,20 +50,22 @@ document.addEventListener('DOMContentLoaded', function (e) {
       }
 
       $.ajax({
-        data: { name: $('#modalRoleName').val(), permissions: permissions },
+        data: { name: $('#roleName').val(), permissions: permissions },
         url: url,
         type: type,
-        success: function (reponse) {
+        success: function (response) {
           Swal.fire({
-            icon: 'success',
-            title: `Successfully!`,
-            text: reponse.message,
+            icon: response.state,
+            title: response.name,
+            text: response.message,
             customClass: {
-              confirmButton: 'btn btn-success'
+              confirmButton: 'btn btn-' + response.state
             }
           });
 
-          location.href = `${baseUrl}administration/roles`;
+          if (response.state == 'success') {
+            location.href = `${baseUrl}administration/roles`;
+          }
         },
         error: function (err) {}
       });

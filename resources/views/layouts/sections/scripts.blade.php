@@ -12,6 +12,7 @@
 <script src="{{ '/js/lang_' . app()->getLocale() . '.js' }}"></script>
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/select2/select2.css')}}" />
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}" />
+<script src="{{asset('assets/vendor/libs/moment/moment.js')}}"></script>
 
 @yield('vendor-script')
 <!-- END: Page Vendor JS-->

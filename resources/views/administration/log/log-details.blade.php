@@ -9,10 +9,6 @@ $configData = Helper::appClasses();
   <h1>{{ trans('logDetails') }}</h1>
   <table class="table">
       <tr>
-          <th>ID</th>
-          <td>{{ $log->id }}</td>
-      </tr>
-      <tr>
           <th>{{ trans('user') }}</th>
           <td>{{ $log->first_name }}</td>
       </tr>
@@ -20,6 +16,10 @@ $configData = Helper::appClasses();
           <th>{{ trans('action') }}</th>
           <td>{{ $log->action }}</td>
       </tr>
+      <tr>
+        <th>{{ trans('description') }}</th>
+        <td>{{ $log->description }}</td>
+    </tr>
       <tr>
           <th>{{ trans('details') }}</th>
           <td><pre>{{ json_encode(json_decode($log->details), JSON_PRETTY_PRINT) }}</pre></td>

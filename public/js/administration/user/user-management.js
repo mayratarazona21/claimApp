@@ -297,14 +297,7 @@ $(function () {
 
   // Delete Record
   $(document).on('click', '.delete-record', function () {
-    var user_id = $(this).data('id'),
-      dtrModal = $('.dtr-bs-modal.show');
-
-    // hide responsive modal in small screen
-    if (dtrModal.length) {
-      dtrModal.modal('hide');
-    }
-
+    var user_id = $(this).data('id');
     // sweetalert for confirmation of delete
     Swal.fire({
       title: oLang.areYouSure,
@@ -313,7 +306,7 @@ $(function () {
       showCancelButton: true,
       confirmButtonText: oLang.yes,
       customClass: {
-        confirmButton: 'btn btn-primary me-3',
+        confirmButton: 'btn btn-warning me-3',
         cancelButton: 'btn btn-label-secondary'
       },
       buttonsStyling: false
@@ -323,8 +316,16 @@ $(function () {
         $.ajax({
           type: 'DELETE',
           url: `${baseUrl}user/${user_id}`,
-          success: function () {
-            dt_user.draw();
+          success: function (response) {
+            Swal.fire({
+              icon: response.state,
+              title: response.title,
+              text: response.message,
+              customClass: {
+                confirmButton: 'btn btn-' + response.state
+              }
+            });
+            location.href = `${baseUrl}administration/users`;
           },
           error: function (error) {
             console.log(error);
@@ -332,14 +333,6 @@ $(function () {
         });
 
         // success sweetalert
-        Swal.fire({
-          icon: 'success',
-          title: oLang.successfully,
-          text: oLang.userHasBeenInactivated,
-          customClass: {
-            confirmButton: 'btn btn-success'
-          }
-        });
       }
     });
   });
@@ -352,39 +345,7 @@ $(function () {
     var user_id = $(this).data('id');
     location.href = baseUrl + 'user/' + user_id + '/edit';
   });
-  /*
-  // edit record
-  $(document).on('click', '.edit-record', function () {
-    var user_id = $(this).data('id'),
-      dtrModal = $('.dtr-bs-modal.show');
 
-    // hide responsive modal in small screen
-    if (dtrModal.length) {
-      dtrModal.modal('hide');
-    }
-
-    // changing the title of offcanvas
-    $('#offcanvasAddUserLabel').html('Edit User');
-
-    // get data
-    $.get(`${baseUrl}user\/${user_id}\/edit`, function (data) {
-      $('#user_id').val(data.id);
-      $('#add-user-fullname').val(data.name);
-      $('#add-user-email').val(data.email);
-      $('#add-user-contact').val(data.contact);
-      $('#id_role').val(data.id_role);
-      $('#id_role').trigger('change');
-    });
-  });
-
-  // changing the title
-  $('.add-new').on('click', function () {
-    $('#user_id').val(''); //reseting input field
-    $('#offcanvasAddUserLabel').html('Add User');
-  }); */
-
-  // Filter form control to default size
-  // ? setTimeout used for multilingual table initialization
   setTimeout(() => {
     $('.dataTables_filter .form-control').removeClass('form-control-sm');
     $('.dataTables_length .form-select').removeClass('form-select-sm');

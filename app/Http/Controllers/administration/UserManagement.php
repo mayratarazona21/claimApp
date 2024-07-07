@@ -37,6 +37,8 @@ class UserManagement extends Controller
     $userDuplicates = $users->diff($usersUnique)->count();
     $roles = Role::where('id_status', 1)->get();
 
+    Log::accessListLog(Auth()->user()->id, 'user');
+
     return view('administration.user.index', [
       'totalUser' => $userCount,
       'verified' => $verified,
@@ -134,35 +136,27 @@ class UserManagement extends Controller
     // create new one if email is unique
     $userEmail = User::where('email', $request->email)->first();
 
+    $aData = [
+      'first_name' => $request->first_name,
+      'last_name' => $request->last_name,
+      'date_birth' => $request->date_birth,
+      'email' => $request->email,
+      'contact' => $request->contact,
+      'password' => Hash::make($request->password),
+    ];
+
     if (empty($userEmail)) {
       $user = User::updateOrCreate(
         ['id' => $userID],
-        [
-          'first_name' => $request->first_name,
-          'last_name' => $request->last_name,
-          'date_birth' => $request->date_birth,
-          'email' => $request->email,
-          'contact' => $request->contact,
-          'password' => Hash::make($request->password),
-        ]
+        $aData
       );
 
       $roles = Role::whereIn('id', $request->roles)->get()->pluck('name')->toArray();
 
       $user->syncRoles($roles);
 
-      Log::create([
-        'user_id' => auth()->id(),
-        'action' => 'create',
-        'details' => json_encode([
-          'target_id' => $userID,
-          'changes' => ['first_name' => $request->first_name,
-          'last_name' => $request->last_name,
-          'email' => $request->email,
-          'contact' => $request->contact,
-          'date_birth' => $request->date_birth],
-        ]),
-      ]);
+      Log::createLog(Auth()->user()->id, 'user', $user->id, $aData);
+
       return response()->json(['message' => trans('userCreateSuccessfully')]);
     } else {
       // user already exist
@@ -218,19 +212,12 @@ class UserManagement extends Controller
         ['id' => $userID],
         ['password' => Hash::make($request->password)]
       );
-      $dataUpdate['password'] = '******';
+
     }
 
     $user->roles()->sync($request->roles);
 
-    Log::create([
-      'user_id' => auth()->id(),
-      'action' => 'update',
-      'details' => json_encode([
-        'target_id' => $userID,
-        'changes' => $dataUpdate,
-      ]),
-    ]);
+    Log::updateLog(auth()->id(),'user',$user->id, ['email' => $user->email] ,$user->getChanges());
 
     // user updated
     return response()->json(['message' => trans('userUpdatedSuccessfully')]);
@@ -245,7 +232,9 @@ class UserManagement extends Controller
   public function destroy($encrypted_id)
   {
     $id = $this->hashidsService->decode($encrypted_id);
-    //$users = User::where('id', $id)->delete();
+
+    $user = User::where('id' , $id)->first();
+
     Log::create([
       'user_id' => auth()->id(),
       'action' => 'delete',
@@ -253,6 +242,15 @@ class UserManagement extends Controller
         'target_id' => $id,
       ]),
     ]);
+
+    Log::deleteLog(Auth()->user()->id, 'user', $user->id, ['email' => $user->email]);
+
     $users = User::updateOrCreate(['id' => $id], ['id_status' => 2]);
+
+    return response()->json([
+      'title' => trans('success'),
+      'state' => 'success',
+      'message' => trans('userHasBeenInactivated'),
+    ]);
   }
 }

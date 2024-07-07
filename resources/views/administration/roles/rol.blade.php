@@ -38,8 +38,8 @@ $configData = Helper::appClasses();
 
         <div class="col-12 mb-4">
           <div class="form-floating form-floating-outline">
-            <input type="text" id="modalRoleName" name="modalRoleName" class="form-control" placeholder="Enter a role name" tabindex="-1" value="{{ $rol->name }}" @disabled($viewOnly)/>
-            <label for="modalRoleName">{{ trans('roleName') }}</label>
+            <input type="text" id="roleName" name="roleName" class="form-control" placeholder="Enter a role name" tabindex="-1" value="{{ $rol->name }}" @disabled($viewOnly)/>
+            <label for="roleName">{{ trans('roleName') }}</label>
           </div>
         </div>
         <div class="col-12">

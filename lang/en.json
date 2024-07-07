@@ -64,5 +64,13 @@
   "editUser": "Edit User",
   "updatePassword": "Update Password",
   "youMustSelectRole": "You must select at least one role.",
-  "userUpdatedSuccessfully": "User updated successfully."
+  "userUpdatedSuccessfully": "User updated successfully.",
+  "contractors": "Contractors",
+  "warning": "Warning!",
+  "success": "Success!",
+  "forgotPassword": "Forgot Password?",
+  "textForgorPassword": "Enter your email and we'll send you instructions to reset your password",
+  "sendResetLink": "Send Reset Link",
+  "backToLogin": "Back to login",
+  "userHasBeenInactivated": "The user has been inactivated!"
 }

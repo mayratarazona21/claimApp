@@ -29,6 +29,9 @@ class RolesController extends Controller
     $roles = CustomRole::join('dictionary AS s', 's.id', '=', 'roles.id_status')
       ->select('roles.id', 'roles.name AS role', 's.name as status', 'roles.created_at AS creation_date', 'id_status')
       ->get();
+
+    Log::accessListLog(Auth()->user()->id, 'roles');
+
     return view('administration.roles.roles', compact('roles'));
   }
   /**
@@ -60,7 +63,7 @@ class RolesController extends Controller
 
     if ($validator->fails()) {
       return response()->json([
-        'name' => 'Warning',
+        'name' => trans('warning'),
         'state' => 'warning',
         'message' => $validator->errors()->all(),
       ]);
@@ -69,30 +72,26 @@ class RolesController extends Controller
     $rol = CustomRole::where('name', ucfirst($request->name))
       ->where('id_status', '=', 1)
       ->count();
+
     if ($rol > 0) {
       return response()->json([
-        'name' => 'Warning',
+        'name' => trans('warning'),
         'state' => 'warning',
         'message' => trans('roleNameExists'),
       ]);
+
     } else {
+
       $role = CustomRole::create([
         'name' => ucfirst($request->name),
         'guard_name' => 'web',
         'id_status' => 1,
       ])->syncPermissions($request->permissions);
 
-      Log::create([
-        'user_id' => auth()->id(),
-        'action' => 'create',
-        'details' => json_encode([
-          'target_id' => $role->id,
-          'name' => $role->name,
-        ]),
-      ]);
+      Log::createLog(Auth()->user()->id, 'roles', $role->id,['name' => $request->name]);
 
       return response()->json([
-        'name' => 'Success',
+        'name' => trans('success'),
         'state' => 'success',
         'message' => trans('messageRolOk'),
       ]);
@@ -140,7 +139,7 @@ class RolesController extends Controller
 
     if ($validator->fails()) {
       return response()->json([
-        'name' => 'Warning',
+        'name' => trans('warning'),
         'state' => 'warning',
         'message' => $validator->errors()->all(),
       ]);
@@ -153,26 +152,20 @@ class RolesController extends Controller
 
     if ($rol > 0) {
       return response()->json([
-        'name' => 'Warning',
+        'name' => trans('warning'),
         'state' => 'warning',
         'message' => trans('roleNameExists'),
       ]);
     } else {
+
       $role = CustomRole::findOrFail($id);
       $role->update(['name' => ucfirst($request->name)]);
       $role->syncPermissions($request->permissions);
 
-      Log::create([
-        'user_id' => auth()->id(),
-        'action' => 'update',
-        'details' => json_encode([
-          'target_id' => $id,
-          'changes' => $request->all(),
-        ]),
-      ]);
+      Log::updateLog(auth()->id(),'roles',$role->id, ['name' => $role->name], $role->getChanges());
 
       return response()->json([
-        'name' => 'Success',
+        'name' => trans('success'),
         'state' => 'success',
         'message' => trans('messageRolOk'),
       ]);
@@ -191,6 +184,9 @@ class RolesController extends Controller
     $permissionsRole = $rol->permissions->pluck('name');
 
     $bAdministratorAccess = Permission::count() == $permissionsRole->count();
+
+    Log::accessLog(Auth()->user()->id, $id , 'roles', ['name' => $rol->name]);
+
     return view(
       'administration.roles.rol',
       compact('menuList', 'rol', 'permissionsRole', 'flag', 'title', 'bAdministratorAccess', 'permissions')
@@ -205,22 +201,28 @@ class RolesController extends Controller
     if ($rol->users->count() > 0) {
       $rol->id_status = 2;
       if ($rol->save()) {
+
+        Log::deleteLog(Auth()->user()->id, 'roles', $id, ['name' => $rol->name]);
+
         return response()->json([
-          'name' => 'Success',
+          'name' => trans('success'),
           'state' => 'success',
           'message' => trans('roleInactiveOk'),
         ]);
       } else {
         return response()->json([
-          'name' => 'Warning',
+          'name' => trans('warning'),
           'state' => 'warning',
           'message' => trans('unexpectedError'),
         ]);
       }
     } else {
       $rol->delete();
+
+      Log::deleteLog(Auth()->user()->id, 'roles', $id, ['name' => $rol->name]);
+
       return response()->json([
-        'name' => 'Success',
+        'name' => trans('success'),
         'state' => 'success',
         'message' => trans('roleDeleteOk'),
       ]);
